@@ -1,0 +1,33 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: questions-v3
+  labels:
+    app: questions
+    version: v3
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: questions
+      version: v3
+  template:
+    metadata:
+      labels:
+        app: questions
+        version: v3
+    spec:
+      containers:
+        - name: questions
+          image: questions:v3
+          imagePullPolicy: Never
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "50Mi"
+            limits:
+              cpu: "500m"
+              memory: "250Mi"
+          ports:
+            - name: http
+              containerPort: 8080

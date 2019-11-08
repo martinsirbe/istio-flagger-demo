@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: questions
+  labels:
+    app: questions
+spec:
+  type: ClusterIP
+  selector:
+    app: questions
+  ports:
+  - name: http
+    protocol: TCP
+    port: 8080
+    targetPort: 8080
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: questions
+  labels:
+    app: questions
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: questions
+  template:
+    metadata:
+      labels:
+        app: questions
+    spec:
+      containers:
+      - name: questions
+        image: questions:latest
+        imagePullPolicy: Never
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "50Mi"
+          limits:
+            cpu: "500m"
+            memory: "250Mi"
+        ports:
+        - name: http
+          containerPort: 8080
+---
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: questions
+  labels:
+    app: questions
+spec:
+  scaleTargetRef:
+    apiVersion: extensions/v1beta1
+    kind: Deployment
+    name: questions
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      targetAverageUtilization: 50
